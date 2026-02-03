@@ -20,22 +20,21 @@ export const handleTaskCommand = async (req, res) => {
 			userId: user_id,
 		});
 
-		// Acknowledge the command immediately
-		res.status(200).send();
-
-		// Check if channel is configured
+		// Check if channel is configured BEFORE acknowledging
 		if (!isChannelConfigured(channel_id)) {
 			logger.warn('Command used in unconfigured channel', {
 				channelId: channel_id,
 			});
 
-			await slackService.postEphemeral(
-				channel_id,
-				user_id,
-				'⚠️ This app can only be run in MeasureHero channels. Please contact your administrator.',
-			);
-			return;
+			// Respond directly to the command - Slack will show this as ephemeral
+			return res.status(200).json({
+				response_type: 'ephemeral',
+				text: '⚠️ This app is only available in MeasureHero channels. Please contact your administrator.',
+			});
 		}
+
+		// Acknowledge the command immediately
+		res.status(200).send();
 
 		// Get client configuration
 		const client = findClientByChannel(channel_id);
