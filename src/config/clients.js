@@ -29,8 +29,8 @@ const clients = [
 	// Equans - Switzerland - Chris Riedlsperger
 	{
 		clientName: 'Equans',
-		channelId: 'C088PCEJM9U',
-		googleSheetId: '1W9MVHDDhVIp3GiEuD9pJBTpNMnsCMfRvVp-CS9OeJX8',
+		channelId: 'C0AC73KTAAX',
+		googleSheetId: '1HvY-jq1Y-pmE1AQJSEeviTUTpGxUtbpSImbaXaYfisU',
 		clockifyProjectId: '69808678bed1dd0a0311aa9a',
 	},
 ];
