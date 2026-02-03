@@ -12,19 +12,27 @@
  */
 
 const clients = [
+	// Acme Corp - Test Client
 	{
-		channelId: 'C0ACJSWMREH', // channel name: #measurehero-app-test
 		clientName: 'Acme Corp',
+		channelId: 'C0ACJSWMREH', // channel name: #measurehero-app-test
 		googleSheetId: '1nNNm8GLXEhD2anuo45VNRFuHRovpa66HzB_uVW112Tg', // [MeasureSchool x Acme] MeasureHero Tasks Template - https://docs.google.com/spreadsheets/d/1nNNm8GLXEhD2anuo45VNRFuHRovpa66HzB_uVW112Tg
 		clockifyProjectId: '6981d9eb6a30c487a86a63bb', // Acme Corp - https://app.clockify.me/projects/6981d9eb6a30c487a86a63bb/edit
 	},
-	// Add more clients below
-	// {
-	//   channelId: 'C06EXAMPLE002',
-	//   clientName: 'Acme Corp',
-	//   googleSheetId: 'your-sheet-id-here',
-	//   clockifyProjectId: 'your-project-id-here',
-	// },
+	// Digr - Norway - Jon Ragnar
+	{
+		clientName: 'Digr',
+		channelId: 'C088PCEJM9U',
+		googleSheetId: '1W9MVHDDhVIp3GiEuD9pJBTpNMnsCMfRvVp-CS9OeJX8',
+		clockifyProjectId: '67886e8ecd49ab24d3a7a7a2',
+	},
+	// Equans - Switzerland - Chris Riedlsperger
+	{
+		clientName: 'Equans',
+		channelId: 'C088PCEJM9U',
+		googleSheetId: '1W9MVHDDhVIp3GiEuD9pJBTpNMnsCMfRvVp-CS9OeJX8',
+		clockifyProjectId: '69808678bed1dd0a0311aa9a',
+	},
 ];
 
 /**
