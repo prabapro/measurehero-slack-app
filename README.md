@@ -74,7 +74,7 @@ Optional:
 - Slash command: `https://measurehero-slack-app-133390045585.europe-west1.run.app/slack/commands`
 - Interactivity: `https://measurehero-slack-app-133390045585.europe-west1.run.app/slack/interactions`
 
-See [docs/SLACK_SETUP.md](docs/SLACK_SETUP.md) for details.
+See [SLACK_SETUP](docs/SLACK_SETUP.md) for details.
 
 ## Google Sheets Setup
 
