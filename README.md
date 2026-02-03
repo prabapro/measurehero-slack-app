@@ -12,8 +12,8 @@ A Node.js application for managing MeasureHero task submissions via Slack, integ
 
 ## Prerequisites
 
-- Node.js 18+
-- pnpm 8+
+- Node.js 22+
+- pnpm 10+
 - Docker Desktop (optional, for containerized local development)
 - Slack workspace with admin access
 - Google Cloud project with Sheets API enabled
@@ -123,6 +123,27 @@ ngrok http --url=innocent-weevil-terribly.ngrok-free.app 3000
 
 Update your Slack app's request URLs with the ngrok URL.
 
+## Deploying to Production
+
+### Google Cloud Run Deployment
+
+This app is designed to run on Google Cloud Run. For detailed deployment instructions, see:
+
+**📚 [Cloud Run Deployment Guide](docs/CLOUD_RUN_DEPLOYMENT.md)**
+
+Quick deploy command (after initial setup):
+
+```bash
+# Build and deploy
+gcloud builds submit --tag europe-west1-docker.pkg.dev/measurehero-slack-app/measurehero-repo/measurehero-slack-app:latest
+
+gcloud run deploy measurehero-slack-app \
+  --image europe-west1-docker.pkg.dev/measurehero-slack-app/measurehero-repo/measurehero-slack-app:latest \
+  --region europe-west1
+```
+
+**Important:** Remember to update your Slack app's request URLs to your Cloud Run URL after deployment.
+
 ## Project Structure
 
 ```
@@ -188,7 +209,3 @@ measurehero-slack-app/
 - Verify `CLOCKIFY_API_KEY` is valid
 - Check project ID exists in the workspace
 - Review logs for specific error messages
-
-## License
-
-MIT
