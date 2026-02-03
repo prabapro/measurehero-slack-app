@@ -12,105 +12,124 @@ import * as slackService from './slackService.js';
  * @param {string} userId - Slack user ID
  * @param {string} channelId - Slack channel ID
  */
-export const processTaskSubmission = async (taskData, client, userId, channelId) => {
-  try {
-    logger.info('Starting task submission process', {
-      clientName: client.clientName,
-      taskTitle: taskData.title,
-      userId,
-    });
+export const processTaskSubmission = async (
+	taskData,
+	client,
+	userId,
+	channelId,
+) => {
+	try {
+		logger.info('Starting task submission process', {
+			clientName: client.clientName,
+			taskTitle: taskData.title,
+			userId,
+		});
 
-    // Step 1: Get user information for display name
-    const userInfo = await slackService.getUserInfo(userId);
-    const userName = userInfo.real_name || userInfo.name;
-    
-    const enrichedTaskData = {
-      ...taskData,
-      createdBy: `@${userName}`,
-    };
+		// Step 1: Get user information for display name
+		const userInfo = await slackService.getUserInfo(userId);
+		const userName = userInfo.real_name || userInfo.name;
 
-    // Step 2: Append task to Google Sheets
-    logger.info('Appending task to Google Sheets', { 
-      sheetId: client.googleSheetId 
-    });
-    const rowIndex = await sheetsService.appendTaskToSheet(
-      client.googleSheetId,
-      enrichedTaskData
-    );
+		const enrichedTaskData = {
+			...taskData,
+			createdBy: `@${userName}`,
+		};
 
-    // Step 3: Create task in Clockify (with retry logic)
-    logger.info('Creating task in Clockify', { 
-      projectId: client.clockifyProjectId 
-    });
-    const clockifyTaskId = await clockifyService.createClockifyTask(
-      client.clockifyProjectId,
-      enrichedTaskData
-    );
+		// Step 2: Post initial thread message immediately with form data
+		logger.info('Posting initial submission message to Slack', { channelId });
+		const submissionMessage = slackService.formatTaskSubmissionMessage(
+			userId,
+			taskData,
+		);
 
-    // Step 4: Update Google Sheets with Clockify task ID
-    logger.info('Updating sheet with Clockify task ID', { 
-      rowIndex, 
-      taskId: clockifyTaskId 
-    });
-    await sheetsService.updateTaskId(
-      client.googleSheetId,
-      rowIndex,
-      clockifyTaskId
-    );
+		const threadResponse = await slackService.postMessage(
+			channelId,
+			submissionMessage.text,
+			submissionMessage.blocks,
+		);
 
-    // Step 5: Wait for configured delay before posting confirmation
-    const delayMs = 15000; // 15 seconds
-    logger.info(`Waiting ${delayMs}ms before posting confirmation...`);
-    await new Promise(resolve => setTimeout(resolve, delayMs));
+		const threadTs = threadResponse.ts;
+		logger.info('Initial thread created', { threadTs, channelId });
 
-    // Step 6: Post confirmation message in channel
-    const sheetUrl = sheetsService.getSheetUrl(client.googleSheetId);
-    const messageContent = slackService.formatTaskConfirmationMessage(
-      userId,
-      clockifyTaskId,
-      sheetUrl
-    );
+		// Step 3: Append task to Google Sheets
+		logger.info('Appending task to Google Sheets', {
+			sheetId: client.googleSheetId,
+		});
+		const rowIndex = await sheetsService.appendTaskToSheet(
+			client.googleSheetId,
+			enrichedTaskData,
+		);
 
-    await slackService.postMessage(
-      channelId,
-      messageContent.text,
-      messageContent.blocks
-    );
+		// Step 4: Create task in Clockify (with retry logic)
+		logger.info('Creating task in Clockify', {
+			projectId: client.clockifyProjectId,
+		});
+		const clockifyTaskId = await clockifyService.createClockifyTask(
+			client.clockifyProjectId,
+			enrichedTaskData,
+		);
 
-    logger.info('Task submission process completed successfully', {
-      clientName: client.clientName,
-      taskId: clockifyTaskId,
-      sheetRow: rowIndex,
-    });
+		// Step 5: Update Google Sheets with Clockify task ID
+		logger.info('Updating sheet with Clockify task ID', {
+			rowIndex,
+			taskId: clockifyTaskId,
+		});
+		await sheetsService.updateTaskId(
+			client.googleSheetId,
+			rowIndex,
+			clockifyTaskId,
+		);
 
-    return {
-      success: true,
-      taskId: clockifyTaskId,
-      rowIndex,
-    };
-  } catch (error) {
-    logger.error('Error processing task submission', {
-      error: error.message,
-      stack: error.stack,
-      clientName: client.clientName,
-      taskTitle: taskData.title,
-    });
+		// Step 6: Post Task ID as a reply to the thread
+		const sheetUrl = sheetsService.getSheetUrl(client.googleSheetId);
+		const confirmationMessage = slackService.formatTaskConfirmationMessage(
+			userId,
+			clockifyTaskId,
+			sheetUrl,
+		);
 
-    // Attempt to notify user of failure
-    try {
-      await slackService.postEphemeral(
-        channelId,
-        userId,
-        '❌ Sorry, there was an error processing your task submission. Our team has been notified. Please try again or contact support.'
-      );
-    } catch (notifyError) {
-      logger.error('Failed to send error notification to user', {
-        error: notifyError.message,
-      });
-    }
+		await slackService.postMessage(
+			channelId,
+			confirmationMessage.text,
+			confirmationMessage.blocks,
+			threadTs, // Reply to the thread
+		);
 
-    throw error;
-  }
+		logger.info('Task submission process completed successfully', {
+			clientName: client.clientName,
+			taskId: clockifyTaskId,
+			sheetRow: rowIndex,
+			threadTs,
+		});
+
+		return {
+			success: true,
+			taskId: clockifyTaskId,
+			rowIndex,
+			threadTs,
+		};
+	} catch (error) {
+		logger.error('Error processing task submission', {
+			error: error.message,
+			stack: error.stack,
+			clientName: client.clientName,
+			taskTitle: taskData.title,
+		});
+
+		// Attempt to notify user of failure
+		try {
+			await slackService.postEphemeral(
+				channelId,
+				userId,
+				'❌ Sorry, there was an error processing your task submission. Our team has been notified. Please try again or contact support.',
+			);
+		} catch (notifyError) {
+			logger.error('Failed to send error notification to user', {
+				error: notifyError.message,
+			});
+		}
+
+		throw error;
+	}
 };
 
 /**
@@ -119,28 +138,28 @@ export const processTaskSubmission = async (taskData, client, userId, channelId)
  * @returns {Object} Validation result with errors array
  */
 export const validateTaskData = (taskData) => {
-  const errors = [];
+	const errors = [];
 
-  if (!taskData.title || taskData.title.trim().length === 0) {
-    errors.push('Title is required');
-  }
+	if (!taskData.title || taskData.title.trim().length === 0) {
+		errors.push('Title is required');
+	}
 
-  if (!taskData.requirement || taskData.requirement.trim().length === 0) {
-    errors.push('Detailed requirement is required');
-  }
+	if (!taskData.requirement || taskData.requirement.trim().length === 0) {
+		errors.push('Detailed requirement is required');
+	}
 
-  if (taskData.websiteUrl && !isValidUrl(taskData.websiteUrl)) {
-    errors.push('Website URL is not valid');
-  }
+	if (taskData.websiteUrl && !isValidUrl(taskData.websiteUrl)) {
+		errors.push('Website URL is not valid');
+	}
 
-  if (taskData.screenRecording && !isValidUrl(taskData.screenRecording)) {
-    errors.push('Screen recording link is not valid');
-  }
+	if (taskData.screenRecording && !isValidUrl(taskData.screenRecording)) {
+		errors.push('Screen recording link is not valid');
+	}
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
+	return {
+		isValid: errors.length === 0,
+		errors,
+	};
 };
 
 /**
@@ -149,10 +168,10 @@ export const validateTaskData = (taskData) => {
  * @returns {boolean} True if valid URL
  */
 const isValidUrl = (string) => {
-  try {
-    new URL(string);
-    return true;
-  } catch (error) {
-    return false;
-  }
+	try {
+		new URL(string);
+		return true;
+	} catch (error) {
+		return false;
+	}
 };

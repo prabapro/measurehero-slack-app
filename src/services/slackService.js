@@ -104,21 +104,87 @@ export const getUserInfo = async (userId) => {
 };
 
 /**
- * Format message with task details and sheet link
- * @param {string} userName - User's display name
- * @param {string} taskId - Clockify task ID
- * @param {string} sheetUrl - Google Sheets URL
- * @returns {Object} Message blocks
+ * Format initial task submission message (creates thread)
+ * @param {string} userId - User ID
+ * @param {Object} taskData - Task submission data
+ * @returns {Object} Message content with text and blocks
  */
-export const formatTaskConfirmationMessage = (userName, taskId, sheetUrl) => {
+export const formatTaskSubmissionMessage = (userId, taskData) => {
+	const fields = [];
+
+	// Add title
+	fields.push({
+		type: 'mrkdwn',
+		text: `*Title:*\n${taskData.title}`,
+	});
+
+	// Add detailed requirement
+	fields.push({
+		type: 'mrkdwn',
+		text: `*Detailed Requirement:*\n${taskData.requirement}`,
+	});
+
+	// Add website URL if provided
+	if (taskData.websiteUrl) {
+		fields.push({
+			type: 'mrkdwn',
+			text: `*Website URL:*\n${taskData.websiteUrl}`,
+		});
+	}
+
+	// Add system access if provided
+	if (taskData.systemAccess) {
+		fields.push({
+			type: 'mrkdwn',
+			text: `*System Access:*\n${taskData.systemAccess}`,
+		});
+	}
+
+	// Add screen recording if provided
+	if (taskData.screenRecording) {
+		fields.push({
+			type: 'mrkdwn',
+			text: `*Screen Recording:*\n${taskData.screenRecording}`,
+		});
+	}
+
 	return {
-		text: `Hey ${userName}\n\nThanks for the task. Task ID: ${taskId}`,
+		text: `Task submitted by <@${userId}>`,
 		blocks: [
 			{
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: `Hey <@${userName}>\n\nThanks for the task. Task ID: *${taskId}*`,
+					text: `✅ *Task Submitted*\n<@${userId}> just submitted a new task. Processing now...`,
+				},
+			},
+			{
+				type: 'divider',
+			},
+			{
+				type: 'section',
+				fields: fields,
+			},
+		],
+	};
+};
+
+/**
+ * Format task confirmation message with Task ID (thread reply)
+ * @param {string} userId - User ID
+ * @param {string} taskId - Clockify task ID
+ * @param {string} sheetUrl - Google Sheets URL
+ * @returns {Object} Message content with text and blocks
+ */
+export const formatTaskConfirmationMessage = (userId, taskId, sheetUrl) => {
+	return {
+		text: `Task ID: ${taskId}`,
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `🎉 *Task Created Successfully*\n\nTask ID: *${taskId}*`,
 				},
 			},
 			{
