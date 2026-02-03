@@ -11,48 +11,63 @@ import logger from '../utils/logger.js';
  * @param {Function} next - Express next middleware function
  */
 export const verifySlackRequest = (req, res, next) => {
-  try {
-    const slackSignature = req.headers['x-slack-signature'];
-    const slackRequestTimestamp = req.headers['x-slack-request-timestamp'];
-    const body = JSON.stringify(req.body);
+	try {
+		const slackSignature = req.headers['x-slack-signature'];
+		const slackRequestTimestamp = req.headers['x-slack-request-timestamp'];
 
-    // Check if signature and timestamp are present
-    if (!slackSignature || !slackRequestTimestamp) {
-      logger.warn('Missing Slack signature or timestamp headers');
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+		// Use raw body that was saved by the verify function
+		const body = req.rawBody;
 
-    // Prevent replay attacks (timestamp should be within 5 minutes)
-    const currentTime = Math.floor(Date.now() / 1000);
-    if (Math.abs(currentTime - slackRequestTimestamp) > 60 * 5) {
-      logger.warn('Slack request timestamp too old', { 
-        requestTimestamp: slackRequestTimestamp, 
-        currentTime 
-      });
-      return res.status(401).json({ error: 'Request timestamp expired' });
-    }
+		// Check if signature and timestamp are present
+		if (!slackSignature || !slackRequestTimestamp) {
+			logger.warn('Missing Slack signature or timestamp headers');
+			return res.status(401).json({ error: 'Unauthorized' });
+		}
 
-    // Compute signature
-    const sigBasestring = `v0:${slackRequestTimestamp}:${body}`;
-    const mySignature = `v0=${crypto
-      .createHmac('sha256', config.slack.signingSecret)
-      .update(sigBasestring)
-      .digest('hex')}`;
+		// Check if raw body was captured
+		if (!body) {
+			logger.error('Raw body not available for signature verification');
+			return res.status(500).json({ error: 'Internal server error' });
+		}
 
-    // Compare signatures using timing-safe comparison
-    const isValid = crypto.timingSafeEqual(
-      Buffer.from(mySignature),
-      Buffer.from(slackSignature)
-    );
+		// Prevent replay attacks (timestamp should be within 5 minutes)
+		const currentTime = Math.floor(Date.now() / 1000);
+		if (Math.abs(currentTime - slackRequestTimestamp) > 60 * 5) {
+			logger.warn('Slack request timestamp too old', {
+				requestTimestamp: slackRequestTimestamp,
+				currentTime,
+			});
+			return res.status(401).json({ error: 'Request timestamp expired' });
+		}
 
-    if (!isValid) {
-      logger.warn('Invalid Slack signature');
-      return res.status(401).json({ error: 'Invalid signature' });
-    }
+		// Compute signature using the raw body
+		const sigBasestring = `v0:${slackRequestTimestamp}:${body}`;
+		const mySignature = `v0=${crypto
+			.createHmac('sha256', config.slack.signingSecret)
+			.update(sigBasestring)
+			.digest('hex')}`;
 
-    next();
-  } catch (error) {
-    logger.error('Error verifying Slack request', { error: error.message });
-    return res.status(500).json({ error: 'Internal server error' });
-  }
+		// Compare signatures using timing-safe comparison
+		const isValid = crypto.timingSafeEqual(
+			Buffer.from(mySignature),
+			Buffer.from(slackSignature),
+		);
+
+		if (!isValid) {
+			logger.warn('Invalid Slack signature', {
+				expected: mySignature,
+				received: slackSignature,
+			});
+			return res.status(401).json({ error: 'Invalid signature' });
+		}
+
+		logger.debug('Slack signature verified successfully');
+		next();
+	} catch (error) {
+		logger.error('Error verifying Slack request', {
+			error: error.message,
+			stack: error.stack,
+		});
+		return res.status(500).json({ error: 'Internal server error' });
+	}
 };

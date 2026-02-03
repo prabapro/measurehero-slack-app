@@ -4,7 +4,7 @@ A Node.js application for managing MeasureHero task submissions via Slack, integ
 
 ## Features
 
-- 📝 Task submission via `/new-measurehero-task` slash command
+- 📝 Task submission via `/measurehero-new-task` slash command
 - 🔄 Automatic synchronization with Google Sheets
 - ⏱️ Clockify task creation with retry logic
 - 📊 Channel-based client routing
@@ -61,7 +61,7 @@ Edit `src/config/clients.js` to add your clients:
 
 1. Create a new Slack app at https://api.slack.com/apps
 2. Enable **Slash Commands**:
-   - Command: `/new-measurehero-task`
+   - Command: `/measurehero-new-task`
    - Request URL: `https://your-domain.com/slack/commands`
 3. Enable **Interactivity**:
    - Request URL: `https://your-domain.com/slack/interactions`
@@ -118,7 +118,7 @@ The app will be available at `http://localhost:3000`
 Use a tunneling service like ngrok:
 
 ```bash
-ngrok http 3000
+ngrok http --url=innocent-weevil-terribly.ngrok-free.app 3000
 ```
 
 Update your Slack app's request URLs with the ngrok URL.

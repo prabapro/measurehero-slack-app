@@ -6,7 +6,7 @@ This guide will walk you through creating and configuring a Slack app for the Me
 
 You'll create a custom Slack app that:
 
-- Responds to the `/new-measurehero-task` slash command
+- Responds to the `/measurehero-new-task` slash command
 - Opens an interactive modal for task submission
 - Posts confirmation messages to channels
 - Uses OAuth for secure authentication
@@ -44,16 +44,16 @@ If you're developing locally, you need to expose your local server to the intern
 4. In a new terminal, expose port 3000:
 
    ```bash
-   ngrok http 3000
+   ngrok http --url=innocent-weevil-terribly.ngrok-free.app 3000
    ```
 
 5. You'll see output like:
 
    ```
-   Forwarding    https://abc123.ngrok.io -> http://localhost:3000
+   Forwarding    https://innocent-weevil-terribly.ngrok-free.app -> http://localhost:3000
    ```
 
-6. Copy the `https://` URL (e.g., `https://abc123.ngrok.io`)
+6. Copy the `https://` URL (e.g., `https://innocent-weevil-terribly.ngrok-free.app`)
    - **Note**: This URL changes each time you restart ngrok
    - You can get a persistent URL with a paid ngrok plan
 
@@ -114,8 +114,8 @@ You'll be redirected to your app's **Basic Information** page.
 2. Click **"Create New Command"**
 
 3. Fill in the command details:
-   - **Command**: `/new-measurehero-task`
-   - **Request URL**: `https://your-ngrok-url.ngrok.io/slack/commands`
+   - **Command**: `/measurehero-new-task`
+   - **Request URL**: `https://innocent-weevil-terribly.ngrok-free.app/slack/commands`
      - Replace `your-ngrok-url.ngrok.io` with your actual ngrok URL
      - Or your production URL if deployed
    - **Short Description**: `Submit a new analytics implementation task`
@@ -139,7 +139,7 @@ This allows Slack to send modal submissions to your app.
 3. Set the **Request URL**:
 
    ```
-   https://your-ngrok-url.ngrok.io/slack/interactions
+   https://innocent-weevil-terribly.ngrok-free.app/slack/interactions
    ```
 
    - Replace with your actual ngrok or production URL
@@ -163,7 +163,7 @@ This allows Slack to send modal submissions to your app.
    | Scope        | Description              | Why We Need It                  |
    | ------------ | ------------------------ | ------------------------------- |
    | `chat:write` | Send messages as the bot | Post task confirmations         |
-   | `commands`   | Add slash commands       | `/new-measurehero-task` command |
+   | `commands`   | Add slash commands       | `/measurehero-new-task` command |
    | `users:read` | View user information    | Get user's display name         |
 
 4. The scopes section should look like:
@@ -281,7 +281,7 @@ Add the channel ID to `src/config/clients.js`:
 
 ```bash
 # Make sure ngrok is running
-ngrok http 3000
+ngrok http --url=innocent-weevil-terribly.ngrok-free.app 3000
 
 # In another terminal
 pnpm dev
@@ -290,7 +290,7 @@ pnpm dev
 ### 2. Test the Health Endpoint
 
 ```bash
-curl https://your-ngrok-url.ngrok.io/health
+curl https://innocent-weevil-terribly.ngrok-free.app/health
 ```
 
 Should return:
@@ -307,7 +307,7 @@ Should return:
 
 1. Go to a configured client channel in Slack
 
-2. Type: `/new-measurehero-task`
+2. Type: `/measurehero-new-task`
 
 3. Press Enter
 
@@ -334,7 +334,7 @@ Every time you restart ngrok, the URL changes. You need to update:
 
 1. **Slash Command Request URL**:
    - Go to **Slash Commands**
-   - Edit `/new-measurehero-task`
+   - Edit `/measurehero-new-task`
    - Update Request URL
 
 2. **Interactivity Request URL**:
@@ -512,7 +512,7 @@ For each new client:
 4. Create Clockify project
 5. Add configuration to `src/config/clients.js`
 6. Invite bot to the channel: `/invite @MeasureHero`
-7. Test with `/new-measurehero-task`
+7. Test with `/measurehero-new-task`
 
 ---
 
