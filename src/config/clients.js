@@ -15,9 +15,9 @@ const clients = [
 	// Acme Corp - Test Client
 	{
 		clientName: 'Acme Corp',
-		channelId: 'C0ACJSWMREH', // channel name: #measurehero-app-test
-		googleSheetId: '1nNNm8GLXEhD2anuo45VNRFuHRovpa66HzB_uVW112Tg', // [MeasureSchool x Acme] MeasureHero Tasks Template - https://docs.google.com/spreadsheets/d/1nNNm8GLXEhD2anuo45VNRFuHRovpa66HzB_uVW112Tg
-		clockifyProjectId: '6981d9eb6a30c487a86a63bb', // Acme Corp - https://app.clockify.me/projects/6981d9eb6a30c487a86a63bb/edit
+		channelId: 'C0ACJSWMREH',
+		googleSheetId: '1nNNm8GLXEhD2anuo45VNRFuHRovpa66HzB_uVW112Tg',
+		clockifyProjectId: '6981d9eb6a30c487a86a63bb',
 	},
 	// Digr - Norway - Jon Ragnar
 	{
