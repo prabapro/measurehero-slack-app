@@ -1,5 +1,3 @@
-# docs/GCP_SETUP.md
-
 # Google Cloud Platform Setup
 
 Quick guide for setting up GCP service account for Google Sheets access.

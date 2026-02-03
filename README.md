@@ -1,5 +1,3 @@
-# README.md
-
 # MeasureHero Slack App
 
 Node.js app for managing task submissions via Slack → Google Sheets → Clockify.

@@ -1,5 +1,3 @@
-# docs/CLOUD_RUN_DEPLOYMENT.md
-
 # Cloud Run Deployment
 
 Quick reference for managing the Cloud Run deployment.

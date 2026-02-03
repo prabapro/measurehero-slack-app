@@ -1,5 +1,3 @@
-# docs/SLACK_SETUP.md
-
 # Slack App Setup
 
 Quick guide for configuring Slack app.
