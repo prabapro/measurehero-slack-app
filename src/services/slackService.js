@@ -110,62 +110,77 @@ export const getUserInfo = async (userId) => {
  * @returns {Object} Message content with text and blocks
  */
 export const formatTaskSubmissionMessage = (userId, taskData) => {
-	const fields = [];
+	const blocks = [
+		{
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `🚀 <@${userId}> just submitted a new task. Processing now...`,
+			},
+		},
+		{
+			type: 'divider',
+		},
+		{
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `*Title:*\n${taskData.title}`,
+			},
+		},
+	];
 
-	// Add title
-	fields.push({
-		type: 'mrkdwn',
-		text: `*Title:*\n${taskData.title}`,
-	});
+	// Add Website URL and System Access side-by-side if either exists
+	if (taskData.websiteUrl || taskData.systemAccess) {
+		const sideFields = [];
 
-	// Add detailed requirement
-	fields.push({
-		type: 'mrkdwn',
-		text: `*Detailed Requirement:*\n${taskData.requirement}`,
-	});
+		if (taskData.websiteUrl) {
+			sideFields.push({
+				type: 'mrkdwn',
+				text: `*Website URL:*\n${taskData.websiteUrl}`,
+			});
+		}
 
-	// Add website URL if provided
-	if (taskData.websiteUrl) {
-		fields.push({
-			type: 'mrkdwn',
-			text: `*Website URL:*\n${taskData.websiteUrl}`,
+		if (taskData.systemAccess) {
+			sideFields.push({
+				type: 'mrkdwn',
+				text: `*System Access:*\n${taskData.systemAccess}`,
+			});
+		}
+
+		blocks.push({
+			type: 'section',
+			fields: sideFields,
 		});
 	}
 
-	// Add system access if provided
-	if (taskData.systemAccess) {
-		fields.push({
-			type: 'mrkdwn',
-			text: `*System Access:*\n${taskData.systemAccess}`,
-		});
-	}
-
-	// Add screen recording if provided
+	// Add Screen Recording if provided
 	if (taskData.screenRecording) {
-		fields.push({
-			type: 'mrkdwn',
-			text: `*Screen Recording:*\n${taskData.screenRecording}`,
+		blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `*Screen Recording:*\n${taskData.screenRecording}`,
+			},
 		});
 	}
+
+	// Add Detailed Requirement
+	blocks.push({
+		type: 'section',
+		text: {
+			type: 'mrkdwn',
+			text: `*Detailed Requirement:*\n${taskData.requirement}`,
+		},
+	});
+
+	blocks.push({
+		type: 'divider',
+	});
 
 	return {
 		text: `Task submitted by <@${userId}>`,
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: `✅ *Task Submitted*\n<@${userId}> just submitted a new task. Processing now...`,
-				},
-			},
-			{
-				type: 'divider',
-			},
-			{
-				type: 'section',
-				fields: fields,
-			},
-		],
+		blocks: blocks,
 	};
 };
 
@@ -174,9 +189,15 @@ export const formatTaskSubmissionMessage = (userId, taskData) => {
  * @param {string} userId - User ID
  * @param {string} taskId - Clockify task ID
  * @param {string} sheetUrl - Google Sheets URL
+ * @param {number} tasksAtATime - Number of tasks handled at a time
  * @returns {Object} Message content with text and blocks
  */
-export const formatTaskConfirmationMessage = (userId, taskId, sheetUrl) => {
+export const formatTaskConfirmationMessage = (
+	userId,
+	taskId,
+	sheetUrl,
+	tasksAtATime,
+) => {
 	return {
 		text: `Task ID: ${taskId}`,
 		blocks: [
@@ -184,14 +205,14 @@ export const formatTaskConfirmationMessage = (userId, taskId, sheetUrl) => {
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: `🎉 *Task Created Successfully*\n\nTask ID: *${taskId}*`,
+					text: `Hey <@${userId}>\n\nThanks for the task. Here's your Task ID: \`${taskId}\`\n\nWe'll validate it and get back to you soon.`,
 				},
 			},
 			{
 				type: 'section',
 				text: {
 					type: 'mrkdwn',
-					text: `You can check all tasks <${sheetUrl}|here>. If you have multiple tasks and need to set priorities, just let us know. We handle three tasks at a time.`,
+					text: `• For any additional notes or questions, please reply to this thread to keep everything organized.\n\n• You can check all tasks <${sheetUrl}|here>. If you have multiple tasks and need to set priorities, just let us know. We handle ${tasksAtATime} tasks at a time.`,
 				},
 			},
 		],

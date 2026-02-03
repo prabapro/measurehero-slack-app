@@ -1,6 +1,7 @@
 // src/services/taskService.js
 
 import logger from '../utils/logger.js';
+import config from '../config/index.js';
 import * as sheetsService from './googleSheetsService.js';
 import * as clockifyService from './clockifyService.js';
 import * as slackService from './slackService.js';
@@ -85,6 +86,7 @@ export const processTaskSubmission = async (
 			userId,
 			clockifyTaskId,
 			sheetUrl,
+			config.tasksAtATime,
 		);
 
 		await slackService.postMessage(
