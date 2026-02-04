@@ -33,6 +33,13 @@ const clients = [
 		googleSheetId: '1HvY-jq1Y-pmE1AQJSEeviTUTpGxUtbpSImbaXaYfisU',
 		clockifyProjectId: '69808678bed1dd0a0311aa9a',
 	},
+	// Google Inc for testing purposes
+	{
+		clientName: 'Google Inc',
+		channelId: 'C0ACE0MRGQ7',
+		googleSheetId: '1mM0BR7A8Fm23uDqT6Kde3UfT60s-pXAzpwaQp2KkR6o',
+		clockifyProjectId: '6982e46e94d4dd09b80be93b',
+	},
 ];
 
 /**
